@@ -51,10 +51,16 @@ import numpy as np
 import cv2
 
 cap = cv2.VideoCapture('pilkarzyki.mp4')
-template = cv2.imread('pilka.png', 0)
-w, h = template.shape[::-1]
+# cap = cv2.VideoCapture('example.jpg')
+# template = cv2.imread('pilka.png', 0)
+# w, h = template.shape[::-1]
 
-boundaries = [([255, 102, 255], [153, 51, 255])]
+# template
+# boundaries = [([G_min, B_min, R_min], [G_max, B_max, R_max])]
+# boundaries = [([25, 146, 190], [62, 174, 250])]
+boundaries_ball = [([25, 120, 190], [100, 255, 255])]
+boundaries_red_players = [([0, 0, 140], [80, 80, 255])]
+# boundaries_blue_players = [([100, 0, 0], [255, 100, 50])]
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -62,7 +68,7 @@ while cap.isOpened():
     # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     #
     # res = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
-    # threshold = 0.7
+    # threshold = 0.8
     # loc = np.where(res >= threshold)
     # for pt in zip(*loc[::-1]):
     #     cv2.rectangle(frame, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
@@ -87,8 +93,58 @@ while cap.isOpened():
         output = cv2.bitwise_and(frame, frame, mask=mask)
 
         # show the images
-        cv2.imshow("images", np.hstack([frame, output]))
-        # cv2.waitKey(0)
+        cv2.imshow("images", output)
+        cv2.waitKey(0)
+
+        r_min = boundaries[0][0][2]
+        r_max = boundaries[0][1][2]
+        g_min = boundaries[0][0][0]
+        g_max = boundaries[0][1][0]
+        b_min = boundaries[0][0][1]
+        b_max = boundaries[0][1][1]
+
+        print("=================================")
+        print("R: " + str(r_min) + " - " + str(r_max))
+        print("G: " + str(g_min) + " - " + str(g_max))
+        print("B: " + str(b_min) + " - " + str(b_max))
+        print("=================================")
+
+        key = cv2.waitKey(33)
+        # red colour
+        if key == ord('R') and r_max < 255:
+            r_max += 1
+        elif key == ord('r') and r_max > 0:
+            r_max -= 1
+        elif key == ord('E') and r_min < 255:
+            r_min += 1
+        elif key == ord('e') and r_min > 0:
+            r_min -= 1
+        # green colour
+        elif key == ord('G') and g_max < 255:
+            g_max += 1
+        elif key == ord('g') and g_max > 0:
+            g_max -= 1
+        elif key == ord('F') and g_min < 255:
+            g_min += 1
+        elif key == ord('f') and g_min > 0:
+            g_min -= 1
+        # blue colour
+        elif key == ord('B') and b_max < 255:
+            b_max += 1
+        elif key == ord('b') and b_max > 0:
+            b_max -= 1
+        elif key == ord('V') and b_min < 255:
+            b_min += 1
+        elif key == ord('v') and b_min > 0:
+            b_min -= 1
+        elif key == ord('h'):
+            print("=================================")
+            print("R: " + str(r_min) + " - " + str(r_max))
+            print("G: " + str(g_min) + " - " + str(g_max))
+            print("B: " + str(b_min) + " - " + str(b_max))
+            print("=================================")
+
+        boundaries = [([g_min, b_min, r_min], [g_max, b_max, r_max])]
 
 cap.release()
 cv2.destroyAllWindows()
