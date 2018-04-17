@@ -57,10 +57,14 @@ cap = cv2.VideoCapture('pilkarzyki.mp4')
 
 # template
 # boundaries = [([G_min, B_min, R_min], [G_max, B_max, R_max])]
-# boundaries = [([25, 146, 190], [62, 174, 250])]
+boundaries = [([25, 146, 190], [62, 174, 250])]
 boundaries_ball = [([25, 120, 190], [100, 255, 255])]
 boundaries_red_players = [([0, 0, 140], [80, 80, 255])]
-# boundaries_blue_players = [([100, 0, 0], [255, 100, 50])]
+boundaries_blue_players = [([100, 0, 0], [255, 100, 50])]
+
+# container for frames
+container = list()
+counter = 0
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -80,6 +84,7 @@ while cap.isOpened():
     # if cv2.waitKey(1) & 0xFF == ord('q'):
     #     break
 
+    # collecting frames to
 
     # loop over the boundaries
     for (lower, upper) in boundaries:
@@ -94,7 +99,7 @@ while cap.isOpened():
 
         # show the images
         cv2.imshow("images", output)
-        cv2.waitKey(0)
+        cv2.waitKey(1)
 
         r_min = boundaries[0][0][2]
         r_max = boundaries[0][1][2]
@@ -145,6 +150,11 @@ while cap.isOpened():
             print("=================================")
 
         boundaries = [([g_min, b_min, r_min], [g_max, b_max, r_max])]
+
+    container.insert(counter,frame)
+    if(counter%70)
+        counter = 0
+    counter += 1
 
 cap.release()
 cv2.destroyAllWindows()
