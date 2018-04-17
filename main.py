@@ -57,8 +57,9 @@ cap = cv2.VideoCapture('pilkarzyki.mp4')
 
 # template
 # boundaries = [([G_min, B_min, R_min], [G_max, B_max, R_max])]
-boundaries = [([25, 146, 190], [62, 174, 250])]
-boundaries_ball = [([25, 120, 190], [100, 255, 255])]
+
+boundaries = [([0, 0, 190], [62, 174, 250])]
+boundaries_ball = [([0, 50, 150], [50, 180, 200])]
 boundaries_red_players = [([0, 0, 140], [80, 80, 255])]
 boundaries_blue_players = [([100, 0, 0], [255, 100, 50])]
 
