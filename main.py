@@ -54,11 +54,12 @@ def main():
     file_counter = 0
     counter = 0
 
+    font = cv2.FONT_ITALIC
+
     while cap.isOpened():
         ret, frame = cap.read()
 
-        image = cv2.imread("logo.png", cv2.IMREAD_UNCHANGED)
-        transparentOverlay(frame, image, (1750, 920), 0.3)
+        set_score_on_frame(frame, font)
 
         buffer[index % BUFFER_SIZE] = frame
         index += 1
@@ -77,12 +78,12 @@ def main():
         else:
             counter += 1
             if counter == 35:
-                print("Saving file")
+                cv2.putText(frame, 'Saving file...', (0, 0), font, 3, (0, 0, 255), 10, cv2.LINE_AA)
                 save_buffer_to_file(buffer, index, output_filename, file_counter)
                 file_counter += 1
-        print(counter)
+            print(counter)
 
-        cv2.imshow("Pilkarzyki game", output)
+        cv2.imshow("Pilkarzyki game", frame)
 
         if set_new_colors:
             cv2.waitKey(0)
@@ -221,6 +222,12 @@ def save_video(cap):
 #     vidcap.release()
 
 
+def set_score_on_frame(frame, font):
+    cv2.putText(frame, 'RED TEAM       0', (50, 100), font, 3, (0, 0, 255), 10, cv2.LINE_AA)
+    cv2.putText(frame, ':', (970, 100), font, 4, (0, 0, 0), 5, cv2.LINE_AA)
+    cv2.putText(frame, '1     BLUE TEAM', (1050, 100), font, 3, (255, 0, 0), 10, cv2.LINE_AA)
+    image = cv2.imread("logo.png", cv2.IMREAD_UNCHANGED)
+    #transparentOverlay(frame, image, (1750, 920), 0.3)
 
 
 def transparentOverlay(src, overlay, pos=(0, 0), scale=1):
