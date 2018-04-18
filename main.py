@@ -40,8 +40,6 @@ VIDEO_HEIGHT = 1080
 output_filename = "output.avi"
 filename = 'pilkarzyki.mp4'
 
-np.set_printoptions(threshold=np.nan)
-
 
 def main():
     BUFFER_SIZE = 120  # 50 frames for goal detection, 70 frames for replay
@@ -50,9 +48,7 @@ def main():
 
     boundaries = set_proper_boundaries()
     cap = cv2.VideoCapture(filename)
-
-    counter = 0
-    counter2 = 0
+    is_goal_detected = False
 
     while cap.isOpened():
         ret, frame = cap.read()
@@ -81,6 +77,10 @@ def main():
             print(counter)
 
             cv2.imshow("Pilkarzyki game", output)
+
+            # save video test
+            # save_video(cap)
+            # video_to_frames(filename, path_output_dir)
 
             if set_new_colors:
                 cv2.waitKey(0)
@@ -170,6 +170,50 @@ def set_colors(boundaries):
         b_min -= 1
 
     return [([g_min, b_min, r_min], [g_max, b_max, r_max])]
+
+def save_video(cap):
+
+    # Define the codec and create VideoWriter object
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    out = cv2.VideoWriter('output.avi', fourcc, 20.0, (1920, 1080))
+
+    while (cap.isOpened()):
+        ret, frame = cap.read()
+        if ret == True:
+            frame = cv2.flip(frame, 0)
+
+            # write the flipped frame
+            out.write(frame)
+
+            cv2.imshow('frame', frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        else:
+            break
+
+    # Release everything if job is finished
+    cap.release()
+    out.release()
+    cv2.destroyAllWindows()
+
+
+
+# def video_to_frames(video, path_output_dir):
+#     # extract frames from a video and save to directory as 'x.png' where
+#     # x is the frame index
+#     vidcap = cv2.VideoCapture(video)
+#     count = 0
+#     while vidcap.isOpened():
+#         success, image = vidcap.read()
+#         if success:
+#             cv2.imwrite(os.path.join(path_output_dir, '%d.png') % count, image)
+#             count += 1
+#         else:
+#             break
+#     cv2.destroyAllWindows()
+#     vidcap.release()
+
+
 
 
 if __name__ == '__main__':
