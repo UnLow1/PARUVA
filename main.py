@@ -32,13 +32,16 @@ detect_red_players = False
 detect_blue_players = False
 # template: boundaries = [([G_min, B_min, R_min], [G_max, B_max, R_max])]
 # boundaries = [([0, 50, 150], [50, 180, 200])] #[([0, 0, 190], [62, 174, 250])]
-boundaries_ball = [([0, 50, 150], [50, 180, 200])]
+# boundaries_ball = [([0, 50, 150], [50, 180, 200])]
+boundaries_ball = [([25, 120, 190], [100, 255, 255])]
 boundaries_red_players = [([0, 0, 140], [80, 80, 255])]
 boundaries_blue_players = [([100, 0, 0], [255, 100, 50])]
 VIDEO_WIDTH = 1920
 VIDEO_HEIGHT = 1080
-output_filename = "output.avi"
+output_filename = "output"
 filename = 'pilkarzyki.mp4'
+
+np.set_printoptions(threshold=np.nan)
 
 
 def main():
@@ -48,7 +51,10 @@ def main():
 
     boundaries = set_proper_boundaries()
     cap = cv2.VideoCapture(filename)
-    is_goal_detected = False
+
+    file_counter = 0
+    counter = 0
+    counter2 = 0
 
     while cap.isOpened():
         ret, frame = cap.read()
@@ -72,8 +78,8 @@ def main():
                 counter += 1
                 if counter == 50:
                     print("Saving file")
-                    save_buffer_to_file(buffer, index)
-                    counter = 0
+                    save_buffer_to_file(buffer, index, output_filename, file_counter)
+                    file_counter += 1
             print(counter)
 
             cv2.imshow("Pilkarzyki game", output)
@@ -93,7 +99,7 @@ def main():
 
 
 def is_ball_detected(output):
-    output2 = cv2.resize(output, (50, 30))
+    output2 = cv2.resize(output, (150, 100))
     for matrix in output2:
         for array in matrix:
             if np.any(array):
@@ -101,8 +107,9 @@ def is_ball_detected(output):
     return False
 
 
-def save_buffer_to_file(buffer, index):
+def save_buffer_to_file(buffer, index, filename, counter):
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    output_filename = str(filename) + str(counter) + ".avi"
     out = cv2.VideoWriter(output_filename, fourcc, 20.0, (VIDEO_WIDTH, VIDEO_HEIGHT))
     if index < len(buffer):
         index = 0
