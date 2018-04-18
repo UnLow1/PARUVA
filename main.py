@@ -40,6 +40,7 @@
 ################################
 ###### CAPTURE FROM TEMPLATE #######
 ################################
+
 # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 #
 # res = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
@@ -62,12 +63,12 @@
 import numpy as np
 import cv2
 
-set_colors = False
+set_new_colors = False
 detect_ball = True
 detect_red_players = False
 detect_blue_players = False
 # template: boundaries = [([G_min, B_min, R_min], [G_max, B_max, R_max])]
-boundaries = [([0, 50, 150], [50, 180, 200])] #[([0, 0, 190], [62, 174, 250])]
+# boundaries = [([0, 50, 150], [50, 180, 200])] #[([0, 0, 190], [62, 174, 250])]
 boundaries_ball = [([0, 50, 150], [50, 180, 200])]
 boundaries_red_players = [([0, 0, 140], [80, 80, 255])]
 boundaries_blue_players = [([100, 0, 0], [255, 100, 50])]
@@ -75,15 +76,10 @@ filename = 'pilkarzyki.mp4'
 
 
 def main():
+    boundaries = set_proper_boundaries()
     cap = cv2.VideoCapture(filename)
-    # cap = cv2.VideoCapture('example.jpg')
-    # template = cv2.imread('pilka.png', 0)
-    # w, h = template.shape[::-1]
-
-
 
     while cap.isOpened():
-        boundaries = set_proper_boudnaries()
 
         ret, frame = cap.read()
 
@@ -101,7 +97,7 @@ def main():
             # show the images
             cv2.imshow("images", output)
 
-            if set_colors:
+            if set_new_colors:
                 cv2.waitKey(0)
                 boundaries = set_colors(boundaries)
             else:
@@ -111,7 +107,7 @@ def main():
     cv2.destroyAllWindows()
 
 
-def set_proper_boudnaries():
+def set_proper_boundaries():
     boundaries = [([25, 146, 190], [62, 174, 250])]
     if detect_ball:
         boundaries = boundaries_ball
@@ -164,12 +160,6 @@ def set_colors(boundaries):
         b_min += 1
     elif key == ord('v') and b_min > 0:
         b_min -= 1
-    elif key == ord('h'):
-        print("=================================")
-        print("R: " + str(r_min) + " - " + str(r_max))
-        print("G: " + str(g_min) + " - " + str(g_max))
-        print("B: " + str(b_min) + " - " + str(b_max))
-        print("=================================")
 
     return [([g_min, b_min, r_min], [g_max, b_max, r_max])]
 
