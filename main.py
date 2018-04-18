@@ -38,7 +38,7 @@ boundaries_blue_players = [([100, 0, 0], [255, 100, 50])]
 VIDEO_WIDTH = 1920
 VIDEO_HEIGHT = 1080
 output_filename = "output"
-filename = 'pilkarzyki30.mp4'
+filename = 'pilkarzyki.mp4'
 frames_without_ball = 35
 
 
