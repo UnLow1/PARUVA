@@ -32,16 +32,13 @@ detect_red_players = False
 detect_blue_players = False
 # template: boundaries = [([G_min, B_min, R_min], [G_max, B_max, R_max])]
 # boundaries = [([0, 50, 150], [50, 180, 200])] #[([0, 0, 190], [62, 174, 250])]
-# boundaries_ball = [([0, 50, 150], [50, 180, 200])]
-boundaries_ball = [([25, 120, 190], [100, 255, 255])]
+boundaries_ball = [([0, 50, 150], [50, 180, 200])]
 boundaries_red_players = [([0, 0, 140], [80, 80, 255])]
 boundaries_blue_players = [([100, 0, 0], [255, 100, 50])]
 VIDEO_WIDTH = 1920
 VIDEO_HEIGHT = 1080
 output_filename = "output"
 filename = 'pilkarzyki.mp4'
-
-np.set_printoptions(threshold=np.nan)
 
 
 def main():
@@ -54,44 +51,44 @@ def main():
 
     file_counter = 0
     counter = 0
-    counter2 = 0
 
     while cap.isOpened():
         ret, frame = cap.read()
         buffer[index % BUFFER_SIZE] = frame
         index += 1
 
-        # loop over the boundaries
-        for (lower, upper) in boundaries:
-            # create NumPy arrays from the boundaries
-            lower = np.array(lower, dtype="uint8")
-            upper = np.array(upper, dtype="uint8")
+        # create NumPy arrays from the boundaries
+        lower = np.array(boundaries[0][0], dtype="uint8")
+        upper = np.array(boundaries[0][1], dtype="uint8")
 
-            # find the colors within the specified boundaries and apply
-            # the mask
-            mask = cv2.inRange(frame, lower, upper)
-            output = cv2.bitwise_and(frame, frame, mask=mask)
+        # find the colors within the specified boundaries and apply
+        # the mask
+        mask = cv2.inRange(frame, lower, upper)
+        output = cv2.bitwise_and(frame, frame, mask=mask)
 
-            if is_ball_detected(output):
-                counter = 0
-            else:
-                counter += 1
-                if counter == 50:
-                    print("Saving file")
-                    save_buffer_to_file(buffer, index, output_filename, file_counter)
-                    file_counter += 1
-            print(counter)
+        if is_ball_detected(output):
+            counter = 0
+        else:
+            counter += 1
+            if counter == 35:
+                print("Saving file")
+                save_buffer_to_file(buffer, index, output_filename, file_counter)
+                file_counter += 1
+        print(counter)
 
-            cv2.imshow("Pilkarzyki game", output)
+        cv2.imshow("Pilkarzyki game", output)
 
-            if set_new_colors:
-                cv2.waitKey(0)
-                boundaries = set_colors(boundaries)
-            else:
-                cv2.waitKey(1)
+        if set_new_colors:
+            cv2.waitKey(0)
+            boundaries = set_colors(boundaries)
+        else:
+            cv2.waitKey(1)
 
     cap.release()
     cv2.destroyAllWindows()
+
+
+# def set_text():
 
 
 def is_ball_detected(output):
@@ -115,6 +112,10 @@ def save_buffer_to_file(buffer, index, filename, counter):
         if i:
             out.write(buffer[index % len(buffer)])
         index += 1
+    frame = cv2.imread("ericsson_logo.jpg")
+    frame2 = cv2.resize(frame, (VIDEO_WIDTH, VIDEO_HEIGHT))
+    for i in range(20):
+        out.write(frame2)
     out.release()
 
 
