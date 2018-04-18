@@ -38,7 +38,7 @@ boundaries_blue_players = [([100, 0, 0], [255, 100, 50])]
 VIDEO_WIDTH = 1920
 VIDEO_HEIGHT = 1080
 output_filename = "output"
-filename = 'pilkarzyki.mp4'
+filename = 'pilkarzyki30.mp4'
 frames_without_ball = 35
 
 
@@ -77,8 +77,8 @@ def main():
         else:
             counter += 1
             if counter == frames_without_ball:
-                # cv2.putText(frame, 'Saving file...', (0, 0), font, 3, (0, 0, 255), 10, cv2.LINE_AA)
                 save_buffer_to_file(buffer, index, output_filename, file_counter)
+                cv2.putText(frame, 'Replay saved', (700, 550), font, 3, (0, 255, 0), 10, cv2.LINE_AA)
                 file_counter += 1
             print(counter)
 
