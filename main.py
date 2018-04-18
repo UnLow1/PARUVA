@@ -52,6 +52,8 @@ def main():
 
     file_counter = 0
     counter = 0
+    replay_saved = False
+    replay_counter = 0
 
     font = cv2.FONT_ITALIC
 
@@ -77,12 +79,20 @@ def main():
         else:
             counter += 1
             if counter == frames_without_ball:
+                replay_saved = True
                 save_buffer_to_file(buffer, index, output_filename, file_counter)
-                cv2.putText(frame, 'Replay saved', (700, 550), font, 3, (0, 255, 0), 10, cv2.LINE_AA)
                 file_counter += 1
             print(counter)
 
-        cv2.imshow("Pilkarzyki game", frame)
+        if(replay_saved):
+            replay_counter += 1
+            cv2.putText(frame, 'Replay saved', (700, 550), font, 3, (0, 0, 0), 10, cv2.LINE_AA)
+            cv2.imshow("Pilkarzyki game", frame)
+            if(replay_counter==30):
+                replay_saved = False
+        else:
+            cv2.imshow("Pilkarzyki game", frame)
+
 
         if set_new_colors:
             cv2.waitKey(0)
