@@ -1,22 +1,4 @@
 ################################
-####### OBJECT DETECTION #######
-################################
-# from matplotlib import pyplot as plt
-#
-# img_rgb = cv2.imread('mario.png')
-# img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
-# template = cv2.imread('mario_coin.png', 0)
-# w, h = template.shape[::-1]
-#
-# res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
-# threshold = 0.8
-# loc = np.where(res >= threshold)
-# for pt in zip(*loc[::-1]):
-#     cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
-#
-# cv2.imwrite('res.png', img_rgb)
-
-################################
 ###### VIDEO FROM CAMERA #######
 ################################
 # cap = cv2.VideoCapture(0)
@@ -37,25 +19,6 @@
 # cap.release()
 # cv2.destroyAllWindows()
 
-################################
-###### CAPTURE FROM TEMPLATE #######
-################################
-
-# gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-#
-# res = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
-# threshold = 0.8
-# loc = np.where(res >= threshold)
-# for pt in zip(*loc[::-1]):
-#     cv2.rectangle(frame, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
-#
-# # cv2.imwrite('res.png', img_rgb)
-#
-# cv2.imshow('frame', frame)
-#
-# if cv2.waitKey(1) & 0xFF == ord('q'):
-#     break
-
 
 ################################
 ###### VIDEO FROM FILE #########
@@ -72,16 +35,25 @@ detect_blue_players = False
 boundaries_ball = [([0, 50, 150], [50, 180, 200])]
 boundaries_red_players = [([0, 0, 140], [80, 80, 255])]
 boundaries_blue_players = [([100, 0, 0], [255, 100, 50])]
-filename = 'pilkarzyki.mp4'
+VIDEO_WIDTH = 1920
+VIDEO_HEIGHT = 1080
+output_filename = "output.avi"
+filename = 'pilkarzyki4sec.mp4'
 
 
 def main():
+    BUFFER_SIZE = 120  # 50 frames for goal detection, 70 frames for replay
+    buffer = [[]] * BUFFER_SIZE
+    index = 0
+
     boundaries = set_proper_boundaries()
     cap = cv2.VideoCapture(filename)
+    is_goal_detected = False
 
     while cap.isOpened():
-
         ret, frame = cap.read()
+        buffer[index % BUFFER_SIZE] = frame
+        index += 1
 
         # loop over the boundaries
         for (lower, upper) in boundaries:
@@ -94,8 +66,12 @@ def main():
             mask = cv2.inRange(frame, lower, upper)
             output = cv2.bitwise_and(frame, frame, mask=mask)
 
+            if is_goal_detected:
+                save_buffer_to_file(buffer, index)
+                is_goal_detected = False
+
             # show the images
-            cv2.imshow("images", output)
+            cv2.imshow("Pilkarzyki game", output)
 
             if set_new_colors:
                 cv2.waitKey(0)
@@ -105,6 +81,16 @@ def main():
 
     cap.release()
     cv2.destroyAllWindows()
+
+
+def save_buffer_to_file(buffer, index):
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    out = cv2.VideoWriter(output_filename, fourcc, 20.0, (VIDEO_WIDTH, VIDEO_HEIGHT))
+    index += 1
+    for i in range(len(buffer) - 50):
+        out.write(buffer[index % len(buffer)])
+        index += 1
+    out.release()
 
 
 def set_proper_boundaries():
