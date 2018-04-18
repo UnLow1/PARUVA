@@ -39,8 +39,7 @@ VIDEO_WIDTH = 1920
 VIDEO_HEIGHT = 1080
 output_filename = "output"
 filename = 'pilkarzyki.mp4'
-
-np.set_printoptions(threshold=np.nan)
+frames_without_ball = 35
 
 
 def main():
@@ -77,8 +76,8 @@ def main():
             counter = 0
         else:
             counter += 1
-            if counter == 35:
-                cv2.putText(frame, 'Saving file...', (0, 0), font, 3, (0, 0, 255), 10, cv2.LINE_AA)
+            if counter == frames_without_ball:
+                # cv2.putText(frame, 'Saving file...', (0, 0), font, 3, (0, 0, 255), 10, cv2.LINE_AA)
                 save_buffer_to_file(buffer, index, output_filename, file_counter)
                 file_counter += 1
             print(counter)
@@ -117,9 +116,9 @@ def save_buffer_to_file(buffer, index, filename, counter):
             out.write(buffer[index % len(buffer)])
         index += 1
     frame = cv2.imread("ericsson_logo.jpg")
-    frame2 = cv2.resize(frame, (VIDEO_WIDTH, VIDEO_HEIGHT))
+    resized_frame = cv2.resize(frame, (VIDEO_WIDTH, VIDEO_HEIGHT))
     for i in range(20):
-        out.write(frame2)
+        out.write(resized_frame)
     out.release()
 
 
@@ -179,58 +178,16 @@ def set_colors(boundaries):
 
     return [([g_min, b_min, r_min], [g_max, b_max, r_max])]
 
-def save_video(cap):
-
-    # Define the codec and create VideoWriter object
-    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    out = cv2.VideoWriter('output.avi', fourcc, 20.0, (1920, 1080))
-
-    while (cap.isOpened()):
-        ret, frame = cap.read()
-        if ret == True:
-            frame = cv2.flip(frame, 0)
-
-            # write the flipped frame
-            out.write(frame)
-
-            cv2.imshow('frame', frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-        else:
-            break
-
-    # Release everything if job is finished
-    cap.release()
-    out.release()
-    cv2.destroyAllWindows()
-
-
-
-# def video_to_frames(video, path_output_dir):
-#     # extract frames from a video and save to directory as 'x.png' where
-#     # x is the frame index
-#     vidcap = cv2.VideoCapture(video)
-#     count = 0
-#     while vidcap.isOpened():
-#         success, image = vidcap.read()
-#         if success:
-#             cv2.imwrite(os.path.join(path_output_dir, '%d.png') % count, image)
-#             count += 1
-#         else:
-#             break
-#     cv2.destroyAllWindows()
-#     vidcap.release()
-
 
 def set_score_on_frame(frame, font):
     cv2.putText(frame, 'RED TEAM       0', (50, 100), font, 3, (0, 0, 255), 10, cv2.LINE_AA)
     cv2.putText(frame, ':', (970, 100), font, 4, (0, 0, 0), 5, cv2.LINE_AA)
     cv2.putText(frame, '1     BLUE TEAM', (1050, 100), font, 3, (255, 0, 0), 10, cv2.LINE_AA)
-    image = cv2.imread("logo.png", cv2.IMREAD_UNCHANGED)
-    #transparentOverlay(frame, image, (1750, 920), 0.3)
+    # image = cv2.imread("logo.png", cv2.IMREAD_UNCHANGED)
+    # transparent_overlay(frame, image, (1750, 920), 0.3)
 
 
-def transparentOverlay(src, overlay, pos=(0, 0), scale=1):
+def transparent_overlay(src, overlay, pos=(0, 0), scale=1):
     """
     :param src: Input Color Background Image
     :param overlay: transparent Image (BGRA)
