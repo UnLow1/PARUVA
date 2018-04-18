@@ -38,7 +38,9 @@ boundaries_blue_players = [([100, 0, 0], [255, 100, 50])]
 VIDEO_WIDTH = 1920
 VIDEO_HEIGHT = 1080
 output_filename = "output.avi"
-filename = 'pilkarzyki4sec.mp4'
+filename = 'pilkarzyki.mp4'
+
+np.set_printoptions(threshold=np.nan)
 
 
 def main():
@@ -48,7 +50,9 @@ def main():
 
     boundaries = set_proper_boundaries()
     cap = cv2.VideoCapture(filename)
-    is_goal_detected = False
+
+    counter = 0
+    counter2 = 0
 
     while cap.isOpened():
         ret, frame = cap.read()
@@ -66,11 +70,16 @@ def main():
             mask = cv2.inRange(frame, lower, upper)
             output = cv2.bitwise_and(frame, frame, mask=mask)
 
-            if is_goal_detected:
-                save_buffer_to_file(buffer, index)
-                is_goal_detected = False
+            if is_ball_detected(output):
+                counter = 0
+            else:
+                counter += 1
+                if counter == 50:
+                    print("Saving file")
+                    save_buffer_to_file(buffer, index)
+                    counter = 0
+            print(counter)
 
-            # show the images
             cv2.imshow("Pilkarzyki game", output)
 
             if set_new_colors:
@@ -83,12 +92,25 @@ def main():
     cv2.destroyAllWindows()
 
 
+def is_ball_detected(output):
+    output2 = cv2.resize(output, (50, 30))
+    for matrix in output2:
+        for array in matrix:
+            if np.any(array):
+                return True
+    return False
+
+
 def save_buffer_to_file(buffer, index):
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     out = cv2.VideoWriter(output_filename, fourcc, 20.0, (VIDEO_WIDTH, VIDEO_HEIGHT))
-    index += 1
-    for i in range(len(buffer) - 50):
-        out.write(buffer[index % len(buffer)])
+    if index < len(buffer):
+        index = 0
+    else:
+        index += 1
+    for i in range(len(buffer)):
+        if i:
+            out.write(buffer[index % len(buffer)])
         index += 1
     out.release()
 
