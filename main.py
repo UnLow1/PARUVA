@@ -40,13 +40,18 @@ VIDEO_HEIGHT = 1080
 output_filename = "output"
 filename = 'pilkarzyki.mp4'
 frames_without_ball = 35
-
+redctr = 0
+bluectr = 0
 
 def main():
     BUFFER_SIZE = 120  # 50 frames for goal detection, 70 frames for replay
     buffer = [[]] * BUFFER_SIZE
     index = 0
-
+    x = 0
+    xgoal = 0
+    isgoal = False
+    global redctr
+    global bluectr
     boundaries = set_proper_boundaries()
     cap = cv2.VideoCapture(filename)
 
@@ -60,18 +65,26 @@ def main():
     while cap.isOpened():
         ret, frame = cap.read()
 
-        set_score_on_frame(frame, font)
-
+        set_score_on_frame(frame, font, xgoal, isgoal)
+        isgoal = False
         buffer[index % BUFFER_SIZE] = frame
         index += 1
 
-        output = find_boundaries_on_frame(boundaries, frame)
+        (output, mask) = find_boundaries_on_frame(boundaries, frame)
 
-        if is_ball_detected(output):
+        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+        if len(cnts) > 0:
+            c = max(cnts, key=cv2.contourArea)
+            ((x, y), radius) = cv2.minEnclosingCircle(c)
+            if x >= 100 and x <= 1850:
+                xgoal = x
+
+        if is_ball_detected(output, x):
             counter = 0
         else:
             counter += 1
             if counter == frames_without_ball:
+                isgoal = True
                 replay_saved = True
                 save_buffer_to_file(buffer, index, output_filename, file_counter)
                 file_counter += 1
@@ -103,14 +116,15 @@ def find_boundaries_on_frame(boundaries, frame):
     # the mask
     mask = cv2.inRange(frame, lower, upper)
     output = cv2.bitwise_and(frame, frame, mask=mask)
-    return output
+    return (output, mask)
 
 
-def is_ball_detected(output):
+def is_ball_detected(output, x):
+    detected = x >= 100 and x <= 1850
     resized_output = cv2.resize(output, (150, 100))
     for matrix in resized_output:
         for array in matrix:
-            if np.any(array):
+            if np.any(array) and detected:
                 return True
     return False
 
@@ -191,11 +205,16 @@ def set_colors(boundaries):
     return [([g_min, b_min, r_min], [g_max, b_max, r_max])]
 
 
-def set_score_on_frame(frame, font):
-    cv2.putText(frame, 'RED TEAM       0', (50, 100), font, 3, (0, 0, 255), 10, cv2.LINE_AA)
+def set_score_on_frame(frame, font, x, isgoal):
+    global bluectr
+    global redctr
+    if isgoal and x > 1000:
+        redctr += 1
+    elif isgoal and x < 700:
+        bluectr += 1
+    cv2.putText(frame, "RED TEAM       " + str(redctr), (50, 100), font, 3, (0, 0, 255), 10, cv2.LINE_AA)
     cv2.putText(frame, ':', (970, 100), font, 4, (0, 0, 0), 5, cv2.LINE_AA)
-    cv2.putText(frame, '1     BLUE TEAM', (1050, 100), font, 3, (255, 0, 0), 10, cv2.LINE_AA)
-
+    cv2.putText(frame, str(bluectr) + "     BLUE TEAM", (1050, 100), font, 3, (255, 0, 0), 10, cv2.LINE_AA)
     # image = cv2.imread("logo.png", cv2.IMREAD_UNCHANGED)
     # transparent_overlay(frame, image, (1750, 920), 0.3)
 
