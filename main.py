@@ -38,7 +38,7 @@ boundaries_blue_players = [([100, 0, 0], [255, 100, 50])]
 VIDEO_WIDTH = 1920
 VIDEO_HEIGHT = 1080
 output_filename = "output"
-filename = 'pilkarzyki30.mp4'
+filename = 'pilkarzyki.mp4'
 frames_without_ball = 35
 
 
@@ -65,14 +65,7 @@ def main():
         buffer[index % BUFFER_SIZE] = frame
         index += 1
 
-        # create NumPy arrays from the boundaries
-        lower = np.array(boundaries[0][0], dtype="uint8")
-        upper = np.array(boundaries[0][1], dtype="uint8")
-
-        # find the colors within the specified boundaries and apply
-        # the mask
-        mask = cv2.inRange(frame, lower, upper)
-        output = cv2.bitwise_and(frame, frame, mask=mask)
+        output = find_boundaries_on_frame(boundaries, frame)
 
         if is_ball_detected(output):
             counter = 0
@@ -82,18 +75,15 @@ def main():
                 replay_saved = True
                 save_buffer_to_file(buffer, index, output_filename, file_counter)
                 file_counter += 1
-            print(counter)
 
-        if(replay_saved):
+        if replay_saved:
             replay_counter += 1
             cv2.putText(frame, 'Replay saved', (700, 550), font, 3, (0, 0, 0), 10, cv2.LINE_AA)
-            cv2.imshow("Pilkarzyki game", frame)
-            if(replay_counter==30):
+            if replay_counter == 30:
                 replay_saved = False
                 replay_counter = 0
-        else:
-            cv2.imshow("Pilkarzyki game", frame)
 
+        cv2.imshow("Pilkarzyki game", frame)
 
         if set_new_colors:
             cv2.waitKey(0)
@@ -105,9 +95,20 @@ def main():
     cv2.destroyAllWindows()
 
 
+def find_boundaries_on_frame(boundaries, frame):
+    # create NumPy arrays from the boundaries
+    lower = np.array(boundaries[0][0], dtype="uint8")
+    upper = np.array(boundaries[0][1], dtype="uint8")
+    # find the colors within the specified boundaries and apply
+    # the mask
+    mask = cv2.inRange(frame, lower, upper)
+    output = cv2.bitwise_and(frame, frame, mask=mask)
+    return output
+
+
 def is_ball_detected(output):
-    output2 = cv2.resize(output, (150, 100))
-    for matrix in output2:
+    resized_output = cv2.resize(output, (150, 100))
+    for matrix in resized_output:
         for array in matrix:
             if np.any(array):
                 return True
@@ -194,6 +195,7 @@ def set_score_on_frame(frame, font):
     cv2.putText(frame, 'RED TEAM       0', (50, 100), font, 3, (0, 0, 255), 10, cv2.LINE_AA)
     cv2.putText(frame, ':', (970, 100), font, 4, (0, 0, 0), 5, cv2.LINE_AA)
     cv2.putText(frame, '1     BLUE TEAM', (1050, 100), font, 3, (255, 0, 0), 10, cv2.LINE_AA)
+
     # image = cv2.imread("logo.png", cv2.IMREAD_UNCHANGED)
     # transparent_overlay(frame, image, (1750, 920), 0.3)
 
