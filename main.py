@@ -8,7 +8,7 @@ if __name__ == '__main__':
     tracker = cv2.TrackerMIL_create()
     video = cv2.VideoCapture("pilkarzyki.mp4")
     ok, frame = video.read()
-    frame = imutils.resize(frame, width=1000)
+    #frame = imutils.resize(frame, width=1000)
     orangeLower = (0,50,150)
     orangeUpper = (50,180,200)
     boundaries = [([0, 50, 150], [50, 180, 200])]
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     while True:
 
         (ok, frame) = video.read()
-        frame = imutils.resize(frame, width=1000)
+        #frame = imutils.resize(frame, width=1000)
         if not ok:
             break
         for (lower, upper) in boundaries:
@@ -71,15 +71,15 @@ if __name__ == '__main__':
         if len(cnts) > 0:
             c = max(cnts, key=cv2.contourArea)
             ((x, y), radius) = cv2.minEnclosingCircle(c)
-            #M = cv2.moments(c)
-            #center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+            M = cv2.moments(c)
+            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
             # only proceed if the radius meets a minimum size
             if radius > 10:
                 # draw the circle and centroid on the frame,
                 # then update the list of tracked points
                 cv2.circle(frame, (int(x), int(y)), int(radius),
                            (0, 255, 255), 2)
-                #cv2.circle(frame, center, 5, (0, 0, 255), -1)
+                cv2.circle(frame, center, 5, (0, 0, 255), -1)
         #bbox = (int(x), int(y), radius, radius)
         #ok, bbox = tracker.update(frame)
 
